@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>滚动驱动序列帧 · 白银版</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #fff; font-family: system-ui, sans-serif; }
+
+  .hero {
+    position: relative;
+    height: 500vh;            /* 5 屏滚动空间，对应 150 帧 */
+  }
+  .hero__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .hero__frame-box {
+    width: 80vmin;
+    aspect-ratio: 16 / 9;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1a1a1a;      /* 没加载出来时显示深灰，方便看"闪白" */
+  }
+  .hero__frame-box img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  /* 调试面板 */
+  .debug {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: rgba(0,0,0,0.8);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    z-index: 100;
+    border: 1px solid #333;
+    min-width: 200px;
+  }
+  .debug b { color: #4fc3f7; }
+  .debug .bad { color: #ff6b6b; }
+  .debug .good { color: #51cf66; }
+
+  .section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #888;
+    text-align: center;
+    padding: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="debug">
+  <div>进度: <b id="d-progress">0.0%</b></div>
+  <div>帧号: <b id="d-frame">0</b> / 149</div>
+  <div>FPS: <b id="d-fps">--</b></div>
+  <div>已加载: <b id="d-loaded">0</b> / 150</div>
+  <div>缓存命中: <span id="d-cache" class="good">0</span></div>
+</div>
+
+<section class="section">↓ 滚动进入 hero 区（白银版 · 150 帧）</section>
+
+<section class="hero" id="hero">
+  <div class="hero__sticky">
+    <div class="hero__frame-box">
+      <img id="frame-img" src="frames/frame_000.svg" alt="序列帧">
+    </div>
+  </div>
+</section>
+
+<section class="section">↑ 快速滚回去再快速滚下来，观察"闪白"和 FPS 掉帧</section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script>
+  // ============ 配置 ============
+  const FRAMES_DIR = "frames";
+  const TOTAL_FRAMES = 150;
+  const LAST_FRAME_INDEX = TOTAL_FRAMES - 1;
+
+  // 帧数据结构：每帧记录 URL、是否已加载、Image 对象（缓存用）
+  const frames = [];
+  for (let i = 0; i < TOTAL_FRAMES; i++) {
+    frames.push({
+      url: `${FRAMES_DIR}/frame_${String(i).padStart(3, "0")}.svg`,
+      loaded: false,
+      img: null,
+    });
+  }
+
+  const imgEl = document.getElementById("frame-img");
+  const heroEl = document.getElementById("hero");
+  const dProgress = document.getElementById("d-progress");
+  const dFrame = document.getElementById("d-frame");
+  const dFps = document.getElementById("d-fps");
+  const dLoaded = document.getElementById("d-loaded");
+  const dCache = document.getElementById("d-cache");
+
+  const playhead = { frame: 0 };
+  let lastRenderedIndex = -1;
+  let currentTargetIndex = 0;
+  let cacheHits = 0;
+
+  // ============ 性能监控 (FPS) ============
+  // 学习用: 滚动时如果 FPS 掉到 30 以下会标红，说明卡了
+  let fpsLast = performance.now();
+  let fpsFrames = 0;
+  function fpsLoop(now) {
+    fpsFrames++;
+    if (now - fpsLast >= 500) {
+      const fps = Math.round((fpsFrames * 1000) / (now - fpsLast));
+      dFps.textContent = fps;
+      dFps.className = fps >= 50 ? "good" : fps >= 30 ? "" : "bad";
+      fpsLast = now;
+      fpsFrames = 0;
+    }
+    requestAnimationFrame(fpsLoop);
+  }
+  requestAnimationFrame(fpsLoop);
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ============ 渲染函数 ============
+  function render() {
+    const idx = currentTargetIndex;
+    if (idx === lastRenderedIndex) return;
+    const frame = frames[idx];
+    if (!frame) return;
+
+    // 关键优化: 如果这帧已经预加载进缓存，直接用缓存，不再触发网络请求
+    if (frame.loaded) {
+      cacheHits++;
+      dCache.textContent = cacheHits;
+    }
+    imgEl.src = frame.url;
+    lastRenderedIndex = idx;
+    dFrame.textContent = idx;
+  }
+
+  // ============ 局部预加载 (白银核心优化) ============
+  // 滚到某帧时，把它前后 RADIUS 帧也提前加载进浏览器缓存。
+  // 这样快速滚动时，目标帧已经在缓存里，不会闪白。
+  // ⚠️ 第一步先注释掉调用，让你看到"不预加载"的惨状；然后解开注释看效果。
+  const PRELOAD_RADIUS = 6;
+  function preloadAround(index) {
+    const start = Math.max(0, index - PRELOAD_RADIUS);
+    const end = Math.min(LAST_FRAME_INDEX, index + PRELOAD_RADIUS);
+    for (let i = start; i <= end; i++) {
+      const frame = frames[i];
+      if (frame.loaded || frame.img) continue;
+      const im = new Image();
+      frame.img = im;
+      im.onload = () => {
+        frame.loaded = true;
+        dLoaded.textContent = frames.filter(f => f.loaded).length;
+      };
+      im.src = frame.url;
+    }
+  }
+
+  // ============ 滚动驱动 ============
+  gsap.to(playhead, {
+    frame: LAST_FRAME_INDEX,
+    ease: "none",
+    snap: "frame",
+    scrollTrigger: {
+      trigger: heroEl,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        const idx = Math.min(
+          LAST_FRAME_INDEX,
+          Math.max(0, Math.floor(progress * LAST_FRAME_INDEX))
+        );
+        currentTargetIndex = idx;
+
+        // ★ 预加载开关 ★
+        // 第一阶段: 注释掉下面这行，体验"快速滚动闪白"
+        // 第二阶段: 解开注释，体验预加载的效果
+        preloadAround(idx);  // 阶段2: 开启
+
+        render();
+        dProgress.textContent = (progress * 100).toFixed(1) + "%";
+      },
+    },
+  });
+
+  // 页面打开时先把第一帧附近预加载一下
+  preloadAround(0);  // 阶段2: 开启
+</script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules
+dist
+.vite
+*.log
+
+# 编辑器 / 系统
+.zcode/
+.DS_Store
+Thumbs.db
