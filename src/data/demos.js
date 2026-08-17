@@ -18,6 +18,14 @@ export const demos = [
     gradient: 'linear-gradient(135deg, #1f5f8b 0%, #2d9ca6 45%, #7ed957 100%)',
     component: () => import('../demos/terrain-noise/TerrainNoise.vue'),
   },
+  {
+    id: 'yunlei-pattern',
+    title: '云雷纹',
+    date: '2026-08-17',
+    desc: '用回旋曲线绘制商周青铜器上的云雷纹，第一步：以原点为圆心的圆曲线 + 坐标轴 + 鼠标拖动。',
+    gradient: 'linear-gradient(135deg, #3a2f1b 0%, #8a6d2f 50%, #e8c47a 100%)',
+    component: () => import('../demos/yunlei-pattern/YunleiPattern.vue'),
+  },
 ];
 
 // 按 id 建索引，方便路由查找
