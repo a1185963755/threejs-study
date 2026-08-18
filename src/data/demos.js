@@ -42,6 +42,14 @@ export const demos = [
     gradient: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
     component: () => import('../demos/infinite-tunnel/InfiniteTunnel.vue'),
   },
+  {
+    id: 'build-house',
+    title: '盖房子',
+    date: '2026-08-18',
+    desc: '浇筑 4000×3000×300 地基 → 砌四面墙（侧墙开窗、前墙开门和窗）→ 吊装 45° 人字斜顶，四段依次盖起来，光照投影，鼠标拖动查看。',
+    gradient: 'linear-gradient(135deg, #4a5568 0%, #a0aec0 55%, #cbd5e0 100%)',
+    component: () => import('../demos/build-house/BuildHouse.vue'),
+  },
 ];
 
 // 按 id 建索引，方便路由查找
