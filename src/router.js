@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Home from './pages/Home.vue';
 import { demos, demosById } from './data/demos.js';
 
@@ -19,7 +19,9 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  // hash 模式：GitHub Pages 是纯静态托管，没有服务端路由兜底，
+  // history 模式在子页面刷新会 404；hash 模式地址形如 /#/demo/snowy-forest
+  history: createWebHashHistory(),
   routes,
 });
 
