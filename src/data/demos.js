@@ -54,7 +54,7 @@ export const demos = [
     id: 'snowy-forest',
     title: '林海雪原',
     date: '2026-08-28',
-    desc: '第一步：FBM 叠加多层 simplex 噪声，在 3000×3000 分段平面上生成随机山脉，线框预览，可调高度 / 尺度 / 种子。',
+    desc: '低频 FBM 噪声铺出平缓雪丘，松树 glTF 上色后 InstancedMesh 种下 18 棵大松树；低机位平视，树影立在纯黑夜幕前。',
     gradient: 'linear-gradient(135deg, #0b1d3a 0%, #2c5f8a 50%, #eaf4fb 100%)',
     component: () => import('../demos/snowy-forest/SnowyForest.vue'),
   },
