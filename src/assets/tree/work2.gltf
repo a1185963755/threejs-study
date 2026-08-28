@@ -1,0 +1,195 @@
+{
+  "asset": {
+    "generator": "glTF-Transform v4.4.2",
+    "version": "2.0"
+  },
+  "accessors": [
+    {
+      "type": "SCALAR",
+      "componentType": 5125,
+      "count": 702390,
+      "bufferView": 0,
+      "byteOffset": 0
+    },
+    {
+      "type": "SCALAR",
+      "componentType": 5123,
+      "count": 23037,
+      "bufferView": 0,
+      "byteOffset": 2809560
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 468260,
+      "max": [
+        5.517377853393555,
+        18.095012664794922,
+        5.342248439788818
+      ],
+      "min": [
+        -5.755506992340088,
+        -0.012229904532432556,
+        -5.53827428817749
+      ],
+      "bufferView": 1,
+      "byteOffset": 0
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 468260,
+      "bufferView": 1,
+      "byteOffset": 12
+    },
+    {
+      "type": "VEC2",
+      "componentType": 5126,
+      "count": 468260,
+      "bufferView": 1,
+      "byteOffset": 24
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 10698,
+      "max": [
+        4.0147223472595215,
+        15.620742797851562,
+        4.158037185668945
+      ],
+      "min": [
+        -4.99712610244751,
+        -0.012269865721464157,
+        -4.415779113769531
+      ],
+      "bufferView": 2,
+      "byteOffset": 0
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5126,
+      "count": 10698,
+      "bufferView": 2,
+      "byteOffset": 12
+    },
+    {
+      "type": "VEC2",
+      "componentType": 5126,
+      "count": 10698,
+      "bufferView": 2,
+      "byteOffset": 24
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 2855636,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2855636,
+      "byteLength": 14984320,
+      "byteStride": 32,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17839956,
+      "byteLength": 342336,
+      "byteStride": 32,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "tree.bin",
+      "byteLength": 18182292
+    }
+  ],
+  "materials": [
+    {
+      "name": "Leaves.002",
+      "doubleSided": true,
+      "pbrMetallicRoughness": {}
+    },
+    {
+      "name": "Material.001",
+      "doubleSided": true,
+      "pbrMetallicRoughness": {}
+    }
+  ],
+  "meshes": [
+    {
+      "name": "leaves.002",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 2,
+            "NORMAL": 3,
+            "TEXCOORD_0": 4
+          },
+          "mode": 4,
+          "material": 0,
+          "indices": 0
+        }
+      ]
+    },
+    {
+      "name": "Mesh.003",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 5,
+            "NORMAL": 6,
+            "TEXCOORD_0": 7
+          },
+          "mode": 4,
+          "material": 1,
+          "indices": 1
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "leaves.001",
+      "mesh": 0
+    },
+    {
+      "name": "tree.001",
+      "translation": [
+        0,
+        0,
+        11.117192268371582
+      ],
+      "mesh": 1,
+      "children": [
+        0
+      ]
+    },
+    {
+      "name": "Pine_Tree",
+      "rotation": [
+        0,
+        -1,
+        0,
+        7.549790126404332e-8
+      ],
+      "children": [
+        1
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        2
+      ]
+    }
+  ],
+  "scene": 0
+}
